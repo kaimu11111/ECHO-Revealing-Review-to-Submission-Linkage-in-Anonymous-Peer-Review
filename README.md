@@ -62,7 +62,7 @@ style evidence and reranking a short list. Top-20 is bounded by the Stage-1 reca
 | Fusion only (no reranking) | 26.5% | 47.0% | 58.7% |
 | LLM only on the fusion top-20 | 24.8% | 51.7% | 62.4% |
 | Paper only | 30.5% | 49.0% | 54.7% |
-| Rebuttal only | 30.9% | 54.7% | 59.7% |
+| Rebuttal only | 30.9% | 52.7% | 59.7% |
 | Content evidence only | 28.9% | 52.0% | 59.4% |
 | Writing-style evidence only | 24.8% | 42.3% | 48.3% |
 | Full ECHO | 34.6% | 54.0% | 63.4% |
@@ -74,8 +74,8 @@ Reviews rewritten by GPT-6 Luna (light: grammar and clarity; heavy: neutral acad
 | Review | semantic sim. | style sim. | Top-1 | Top-5 | Top-10 | content bits | style bits |
 |---|---|---|---|---|---|---|---|
 | Original | – | – | 34.6% | 54.0% | 63.4% | 1.12 | 0.43 |
-| Light rewrite | 0.998 | 0.92 | 29.9% | 51.3% | 59.1% | 1.12 | 0.37 |
-| Heavy rewrite | 0.993 | 0.59 | 21.5% | 44.6% | 52.3% | 1.09 | 0.17 |
+| Light rewrite | 0.998 | 0.92 | 22.1% | 42.3% | 56.7% | 1.12 | 0.37 |
+| Heavy rewrite | 0.993 | 0.59 | 20.5% | 40.3% | 49.7% | 1.09 | 0.17 |
 
 Rewriting suppresses the style channel (0.43 → 0.17 bits) but leaves the content channel almost untouched
 (1.12 → 1.09 bits): the attack weakens but the reviewer's submission still lands in the top 10 for more than half
