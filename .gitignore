@@ -1,0 +1,11 @@
+# caches and outputs written by the scripts
+work/
+outputs/
+# python
+__pycache__/
+*.pyc
+.venv/
+# editors / OS
+.vscode/
+.idea/
+.DS_Store
