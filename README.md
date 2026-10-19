@@ -14,6 +14,74 @@ by Rong Wang and Mulong Luo (Florida State University). arXiv link to follow.
 Reproducing the paper means recomputing the Stage-1 signals (one GPU, a few hours) and the Stage-2 LLM
 judgements (API access, about \$3 for GPT-6 Luna on the full benchmark).
 
+## The paper in brief
+
+**Threat.** At many venues, researchers who submit papers also review in the same cycle, so an anonymous review
+coexists with public artifacts written by the same person: their own submission and, when available, its rebuttal.
+We ask whether a review can be linked to the reviewer's own submission using only these routinely released
+artifacts, with no reviewer profiles, no previously labeled reviews, and no platform metadata. Each candidate is a
+single submission, never an aggregated author profile, so a successful link shrinks the reviewer's anonymity set to
+that paper's authors.
+
+**Benchmark.** R2S-Bench is built from the F1000 open-research platform (11 journals), where reviews are publicly
+signed and articles carry author responses. Signatures are used only to establish ground truth. From 12,466
+articles, 37,673 reviews and 13,117 rebuttals we identify 2,727 reviewer-authors (ORCID or conservative
+name + affiliation matching), group articles into eight research areas (KMeans on SPECTER2), and build for each
+review a candidate set of same-area submissions that were public at review time. The final benchmark has 298
+instances from 256 reviewer-authors with a median of 414 candidates.
+
+**Method.** ECHO standardizes 46 similarity signals within each candidate set and fuses them with a conditional
+logit: a content channel (chunked dense similarity from six encoder configurations, BM25, character n-grams,
+between the review and both the candidate paper and its rebuttal) and a writing-style channel (handcrafted
+stylometric features on deterministically content-masked text, plus the STAR authorship encoder, between the
+review and the rebuttal). An LLM then reranks the fusion top-20 from a 0–100 pairwise score, combined with the
+fusion score (α chosen on reviewer-disjoint folds).
+
+### Main results (298 instances, median 414 candidates)
+
+| Method | Top-1 | Top-5 | Top-10 | Top-20 | Time | Cost |
+|---|---|---|---|---|---|---|
+| Random | 0.5% | 2.6% | 5.3% | 10.5% | – | – |
+| Open-source LLM, full pool (Qwen3-32B) | 7.0% | 14.4% | 21.1% | 31.5% | 14.5 h | – |
+| Closed-source LLM, full pool (GPT-6 Luna) | 18.5% | 35.6% | 44.6% | 54.7% | 4.5 h | $40.9 |
+| **ECHO** (GPT-6 Luna) | 34.6% | 54.0% | 63.4% | 67.4% | 2.5 h | $2.74 |
+| ECHO (Claude Opus 5.5)† | 44.3% | 60.4% | 64.8% | 67.4% | 3.7 h | $81 |
+| ECHO (GPT-6 Astra) | 56.4% | 65.4% | 66.4% | 67.4% | 2.4 h | $143 |
+
+†Claude Opus 5.5 declined 9.2% of the pairwise judgements on safety grounds; declined judgements are scored as
+neutral. On a random 20-instance subset, GPT-6 Astra scoring every candidate directly reaches a Top-10 of 95.0%
+versus 80.0% for ECHO with Astra, but at $228 for the subset (about $3,400 for the whole benchmark) against $9.6.
+
+Scoring every candidate with the same LLM is both worse and far more expensive than first exploiting content and
+style evidence and reranking a short list. Top-20 is bounded by the Stage-1 recall of 67.4%.
+
+### Ablations (full pipeline, GPT-6 Luna reranker)
+
+| Variant | Top-1 | Top-5 | Top-10 |
+|---|---|---|---|
+| Fusion only (no reranking) | 26.5% | 47.0% | 58.7% |
+| LLM only on the fusion top-20 | 24.8% | 51.7% | 62.4% |
+| Paper only | 30.5% | 49.0% | 54.7% |
+| Rebuttal only | 30.9% | 54.7% | 59.7% |
+| Content evidence only | 28.9% | 52.0% | 59.4% |
+| Writing-style evidence only | 24.8% | 42.3% | 48.3% |
+| Full ECHO | 34.6% | 54.0% | 63.4% |
+
+### Effect of AI rewriting of the review
+
+Reviews rewritten by GPT-6 Luna (light: grammar and clarity; heavy: neutral academic English), attacker unchanged.
+
+| Review | semantic sim. | style sim. | Top-1 | Top-5 | Top-10 | content bits | style bits |
+|---|---|---|---|---|---|---|---|
+| Original | – | – | 34.6% | 54.0% | 63.4% | 1.12 | 0.43 |
+| Light rewrite | 0.998 | 0.92 | 29.9% | 51.3% | 59.1% | 1.12 | 0.37 |
+| Heavy rewrite | 0.993 | 0.59 | 21.5% | 44.6% | 52.3% | 1.09 | 0.17 |
+
+Rewriting suppresses the style channel (0.43 → 0.17 bits) but leaves the content channel almost untouched
+(1.12 → 1.09 bits): the attack weakens but the reviewer's submission still lands in the top 10 for more than half
+of the heavily rewritten reviews. Bits are the information gain over uniform guessing of a ranker using one channel
+alone, log₂N + log₂P(true candidate), averaged over instances.
+
 ## Layout
 
 
