@@ -2,8 +2,8 @@
 
 <p align="center"><img src="docs/ECHO2.png" alt="R2S-Bench construction and the two stages of ECHO" width="100%"></p>
 
-Code and benchmark for the paper *Review-to-Submission Linkage: Reviewer Anonymity under Publicly Released
-Peer-Review Artifacts* (anonymous submission).
+Code and benchmark for the paper *ECHO: Revealing Review-to-Submission Linkage in Anonymous Peer Review*
+by Rong Wang and Mulong Luo (Florida State University). arXiv link to follow.
 
 * **R2S-Bench** – 298 instances. Each pairs one sanitized anonymous review with a candidate set of submissions
   from the same research area (median 414) and one ground-truth submission written by the reviewer.
@@ -104,6 +104,17 @@ Reviewer identities are used only to establish ground truth and are replaced by 
 rebuttals are sanitized (names, affiliations, e-mail addresses, ORCID identifiers, profile links, signatures and
 platform templates removed; see the paper's appendix). The underlying texts are public on the F1000 platform.
 The benchmark is released for research on reviewer anonymity; do not use it to identify individual reviewers.
+
+## Citation
+
+```bibtex
+@article{echo2026,
+  title   = {ECHO: Revealing Review-to-Submission Linkage in Anonymous Peer Review},
+  author  = {Wang, Rong and Luo, Mulong},
+  journal = {arXiv preprint},
+  year    = {2026}
+}
+```
 
 ## License
 
