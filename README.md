@@ -1,5 +1,7 @@
 # R2S-Bench and ECHO: review-to-submission linkage
 
+<p align="center"><img src="docs/ECHO2.png" alt="R2S-Bench construction and the two stages of ECHO" width="100%"></p>
+
 Code and benchmark for the paper *Review-to-Submission Linkage: Reviewer Anonymity under Publicly Released
 Peer-Review Artifacts* (anonymous submission).
 
