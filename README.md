@@ -3,7 +3,7 @@
 <p align="center"><img src="docs/ECHO2.png" alt="R2S-Bench construction and the two stages of ECHO" width="100%"></p>
 
 Code and benchmark for the paper *ECHO: Revealing Review-to-Submission Linkage in Anonymous Peer Review*
-by Rong Wang and Mulong Luo (Florida State University). arXiv link to follow.
+by Rong Wang and Mulong Luo (Florida State University). Paper: https://arxiv.org/abs/2610.27044
 
 * **R2S-Bench** – 298 instances. Each pairs one sanitized anonymous review with a candidate set of submissions
   from the same research area (median 414) and one ground-truth submission written by the reviewer.
@@ -176,11 +176,12 @@ The benchmark is released for research on reviewer anonymity; do not use it to i
 ## Citation
 
 ```bibtex
-@article{echo2026,
+@article{wang2026echo,
   title   = {ECHO: Revealing Review-to-Submission Linkage in Anonymous Peer Review},
   author  = {Wang, Rong and Luo, Mulong},
-  journal = {arXiv preprint},
-  year    = {2026}
+  journal = {arXiv preprint arXiv:2610.27044},
+  year    = {2026},
+  url     = {https://arxiv.org/abs/2610.27044}
 }
 ```
 
