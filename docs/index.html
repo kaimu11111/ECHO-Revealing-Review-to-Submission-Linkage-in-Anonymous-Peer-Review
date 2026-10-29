@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ECHO: Review-to-Submission Linkage</title>
+<meta name="description" content="Can an anonymous peer review be linked to the reviewer's own submission using only publicly released review artifacts? R2S-Bench and ECHO.">
+<meta property="og:title" content="ECHO: Revealing Review-to-Submission Linkage in Anonymous Peer Review">
+<meta property="og:description" content="A two-stage method links anonymous reviews to the reviewer's own submission in the top 10 for 63.4% of reviews among a median of 414 candidates, using only public peer-review artifacts.">
+<meta property="og:image" content="ECHO2.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single reading column (68ch) with full-width bands for the figure and the results; quiet slate neutrals with one amber signal colour for the numbers that matter. */
+:root {
+  --bg: #f7f8fa; --bg-band: #eceff3; --fg: #1b2230; --fg-muted: #586174; --rule: #d3d8e0;
+  --accent: #b4540a; --accent-soft: #fbe9d9; --link: #1f4e8c; --card: #ffffff;
+  --display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161d; --bg-band: #1a2029; --fg: #e6e9ef; --fg-muted: #9aa4b5; --rule: #2d3542;
+    --accent: #f0a05a; --accent-soft: #3a2a1a; --link: #8fb4e8; --card: #1e2530; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161d; --bg-band: #1a2029; --fg: #e6e9ef; --fg-muted: #9aa4b5; --rule: #2d3542;
+  --accent: #f0a05a; --accent-soft: #3a2a1a; --link: #8fb4e8; --card: #1e2530; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 17px; line-height: 1.6; }
+a { color: var(--link); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+img { max-width: 100%; height: auto; display: block; }
+.wrap { max-width: 68rem; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.prose { max-width: 68ch; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h1 { font-size: clamp(2rem, 4.5vw, 3.1rem); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.7rem; font-weight: 600; margin-block: 2.6rem 0.9rem; }
+h3 { font-size: 1.2rem; font-weight: 600; margin-block: 1.6rem 0.5rem; }
+p { margin: 0 0 1rem; }
+.eyebrow { font-family: var(--body); font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-muted); font-weight: 600; margin-bottom: 1rem; }
+header.hero { padding-block: 3.5rem 2.5rem; }
+.authors { margin-top: 1.4rem; font-size: 1.05rem; }
+.authors .aff { color: var(--fg-muted); }
+.links { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.4rem; }
+.btn { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.55rem 1rem; border: 1px solid var(--rule); border-radius: 999px; background: var(--card); color: var(--fg); text-decoration: none; font-weight: 500; font-size: 0.95rem; }
+.btn:hover { border-color: var(--accent); }
+.btn svg { width: 1em; height: 1em; }
+.band { background: var(--bg-band); padding-block: 2.2rem; margin-block: 2rem; }
+.band .wrap { display: grid; gap: 1rem; }
+figure { margin: 0; }
+figcaption { font-size: 0.9rem; color: var(--fg-muted); margin-top: 0.6rem; max-width: 68ch; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1rem; margin-block: 1.8rem; }
+.stat { border-top: 2px solid var(--accent); padding-top: 0.6rem; min-width: 0; }
+.stat .n { font-family: var(--display); font-size: 2.2rem; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat .l { font-size: 0.9rem; color: var(--fg-muted); margin-top: 0.25rem; }
+.tablewrap { overflow-x: auto; margin-block: 1rem 0.5rem; }
+table { border-collapse: collapse; width: 100%; font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+th, td { padding: 0.5rem 0.7rem; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; white-space: normal; }
+thead th { font-weight: 600; color: var(--fg-muted); font-size: 0.82rem; letter-spacing: 0.04em; text-transform: uppercase; border-bottom: 2px solid var(--rule); }
+tr.ours td { font-weight: 600; background: var(--accent-soft); }
+tr.group td { color: var(--fg-muted); font-style: italic; font-weight: 500; padding-top: 0.9rem; border-bottom: none; }
+.note { font-size: 0.9rem; color: var(--fg-muted); }
+.twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+@media (max-width: 720px) { .twocol { grid-template-columns: 1fr; } }
+pre { font-family: var(--mono); font-size: 0.85rem; line-height: 1.5; background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 1rem; overflow-x: auto; margin: 0; }
+.copy { font-family: var(--body); font-size: 0.85rem; padding: 0.35rem 0.8rem; border: 1px solid var(--rule); border-radius: 999px; background: var(--card); color: var(--fg); cursor: pointer; margin-top: 0.6rem; }
+footer { margin-block: 3rem 2rem; font-size: 0.9rem; color: var(--fg-muted); }
+@media (prefers-reduced-motion: no-preference) { .btn { transition: border-color 150ms ease; } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">arXiv preprint 2610.27044 · October 2026</div>
+    <h1><span style="font-variant: small-caps; letter-spacing: 0.04em;">ECHO</span>: Revealing Review-to-Submission Linkage in Anonymous Peer Review</h1>
+    <div class="authors">
+      <a href="https://github.com/kaimu11111">Rong Wang</a> and Mulong Luo<br>
+      <span class="aff">Florida State University</span>
+    </div>
+    <div class="links">
+      <a class="btn" href="https://arxiv.org/abs/2610.27044"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/></svg>Paper (arXiv)</a>
+      <a class="btn" href="https://arxiv.org/pdf/2610.27044">PDF</a>
+      <a class="btn" href="https://github.com/kaimu11111/ECHO-Revealing-Review-to-Submission-Linkage-in-Anonymous-Peer-Review"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>Code &amp; Benchmark</a>
+      <a class="btn" href="https://github.com/kaimu11111/ECHO-Revealing-Review-to-Submission-Linkage-in-Anonymous-Peer-Review/tree/main/benchmark">R2S-Bench data</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap prose">
+    <p style="font-size: 1.15rem;">Reviewers at large venues are usually authors in the same cycle. That means an anonymous review coexists with two public texts written by the same person: their own submission and its rebuttal. We ask whether a review can be linked back to that submission using nothing but these routinely released artifacts.</p>
+    <p>It can. Among a median of 414 same-area candidate submissions, <span style="font-variant: small-caps;">ECHO</span> places the reviewer's own paper in the top 10 for 63.4% of reviews with a mid-tier LLM as reranker, and for 66.4% with a stronger one, against 5.3% by chance. No reviewer profile, no previously labelled reviews, and no platform metadata are involved. Each candidate is a single submission, so a successful link shrinks the reviewer's anonymity set to that paper's authors.</p>
+
+    <div class="stats">
+      <div class="stat"><div class="n">63.4%</div><div class="l">of reviews linked to the reviewer's own submission in the top 10</div></div>
+      <div class="stat"><div class="n">34.6%</div><div class="l">ranked first, out of a median of 414 candidates</div></div>
+      <div class="stat"><div class="n">$2.74</div><div class="l">LLM cost to run the attack on the whole benchmark</div></div>
+      <div class="stat"><div class="n">52.3%</div><div class="l">top-10 rate that survives heavy AI rewriting of the review</div></div>
+    </div>
+  </div>
+
+  <section class="band">
+    <div class="wrap">
+      <figure>
+        <img src="ECHO2.png" alt="Three panels: R2S-Bench construction from a submission pool with reviewer-author matching and SPECTER2 + KMeans research areas; ECHO Stage 1 with a content/expertise channel and a writing-style channel fused into one score; ECHO Stage 2 reranking the top 20 with an LLM." width="1815" height="867">
+        <figcaption>R2S-Bench construction (left) and the two stages of ECHO. Stage 1 fuses 46 content and writing-style signals; Stage 2 asks an LLM to score each of the top-20 candidates against the review and combines both scores.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <div class="wrap prose">
+    <h2>Why this is a new leak</h2>
+    <p>Prior work de-anonymizes manuscripts from citations or style, or matches a review against the same reviewer's earlier reviews. Both need identity-linked history. Review-to-submission linkage needs none: the reviewed paper, the review, the candidate submissions and their rebuttals are all released by the venue itself. The ICLR 2026 OpenReview incident showed what happens when reviewer identities leak through a platform bug. This work shows that a sizeable part of that anonymity can be lost even when the platform leaks nothing.</p>
+
+    <h2>R2S-Bench</h2>
+    <p>Double-blind venues never expose the ground truth, so we build it from the F1000 open-research platform, where reviews are publicly signed and articles carry author responses. From 11 journals (12,466 articles, 37,673 reviews, 13,117 rebuttals) we identify 2,727 reviewer-authors by ORCID or conservative name-and-affiliation matching, group articles into eight research areas with SPECTER2 embeddings, and build for each review a candidate set of same-area submissions that were public at review time. Signatures are used only for ground truth and are stripped from every input, together with names, affiliations, e-mail addresses, profile links and platform templates.</p>
+    <p>The benchmark has 298 instances from 256 reviewer-authors. Each instance is one sanitized review, a candidate set (17 to 1,181 submissions, median 414) and one gold submission. Every candidate is represented by its title and abstract and by its rebuttal; for the gold candidate the rebuttal is the one the reviewer wrote. Article ids are salted hashes and reviewers are pseudonymous.</p>
+
+    <h2>ECHO</h2>
+    <p><strong>Stage 1, two evidence channels.</strong> A content channel compares the review with the candidate paper and rebuttal through chunked dense similarity from six encoder configurations, BM25 and character n-grams. A writing-style channel compares the review with the rebuttal after deterministic content masking removes nouns, proper nouns, adjectives, numbers and rare verbs, leaving function words, hedges, punctuation and sentence shape for 122 handcrafted stylometric features; the STAR authorship encoder adds one more signal. All 46 signals are standardized within the candidate set and fused by a conditional logit fitted with reviewer-grouped cross-validation.</p>
+    <p><strong>Stage 2, LLM reranking.</strong> For each of the fusion top-20, an LLM reads the review, the candidate's abstract and its rebuttal and returns a 0 to 100 score for same authorship. The score is standardized over the shortlist and averaged with the fusion score. The reviewed paper itself is never shown to the model.</p>
+  </div>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 style="margin-top: 0;">Main results</h2>
+      <p class="note">298 instances, median 414 candidates. Top-k is the share of instances whose true submission is ranked within the first k. Time is wall-clock for the whole benchmark; Cost is API spend.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Method</th><th>Top-1</th><th>Top-5</th><th>Top-10</th><th>Top-20</th><th>Time</th><th>Cost</th></tr></thead>
+          <tbody>
+            <tr><td>Random</td><td>0.5%</td><td>2.6%</td><td>5.3%</td><td>10.5%</td><td>–</td><td>–</td></tr>
+            <tr><td>Open-source LLM scoring every candidate (Qwen3-32B)</td><td>7.0%</td><td>14.4%</td><td>21.1%</td><td>31.5%</td><td>14.5 h</td><td>–</td></tr>
+            <tr><td>Closed-source LLM scoring every candidate (GPT-6 Luna)</td><td>18.5%</td><td>35.6%</td><td>44.6%</td><td>54.7%</td><td>4.5 h</td><td>$40.9</td></tr>
+            <tr class="ours"><td>ECHO (GPT-6 Luna reranker)</td><td>34.6%</td><td>54.0%</td><td>63.4%</td><td>67.4%</td><td>2.5 h</td><td>$2.74</td></tr>
+            <tr><td>ECHO (Claude Opus 5.5 reranker)<sup>†</sup></td><td>44.3%</td><td>60.4%</td><td>64.8%</td><td>67.4%</td><td>3.7 h</td><td>$81</td></tr>
+            <tr><td>ECHO (GPT-6 Astra reranker)</td><td>56.4%</td><td>65.4%</td><td>66.4%</td><td>67.4%</td><td>2.4 h</td><td>$143</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note"><sup>†</sup>Claude Opus 5.5 declined 9.2% of the pairwise judgements on safety grounds; declined judgements are scored as neutral. Scoring every candidate with the same LLM is both worse and far more expensive than first exploiting content and style evidence and reranking a short list. Top-20 is bounded by the Stage-1 recall of 67.4%.</p>
+
+      <div class="twocol" style="margin-top: 1.5rem;">
+        <div style="min-width: 0;">
+          <h3 style="margin-top: 0;">What each part contributes</h3>
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th>Variant</th><th>Top-1</th><th>Top-5</th><th>Top-10</th></tr></thead>
+              <tbody>
+                <tr><td>Fusion only, no reranking</td><td>26.5%</td><td>47.0%</td><td>58.7%</td></tr>
+                <tr><td>LLM only on the fusion top-20</td><td>24.8%</td><td>51.7%</td><td>62.4%</td></tr>
+                <tr><td>Paper only</td><td>30.5%</td><td>49.0%</td><td>54.7%</td></tr>
+                <tr><td>Rebuttal only</td><td>30.9%</td><td>54.7%</td><td>59.7%</td></tr>
+                <tr><td>Content evidence only</td><td>28.9%</td><td>52.0%</td><td>59.4%</td></tr>
+                <tr><td>Writing-style evidence only</td><td>24.8%</td><td>42.3%</td><td>48.3%</td></tr>
+                <tr class="ours"><td>Full ECHO</td><td>34.6%</td><td>54.0%</td><td>63.4%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div style="min-width: 0;">
+          <h3 style="margin-top: 0;">Does AI rewriting the review help?</h3>
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th>Review</th><th>Top-1</th><th>Top-10</th><th>content bits</th><th>style bits</th></tr></thead>
+              <tbody>
+                <tr><td>Original</td><td>34.6%</td><td>63.4%</td><td>1.12</td><td>0.43</td></tr>
+                <tr><td>Light rewrite (grammar, clarity)</td><td>29.9%</td><td>59.1%</td><td>1.12</td><td>0.37</td></tr>
+                <tr><td>Heavy rewrite (neutral academic English)</td><td>21.5%</td><td>52.3%</td><td>1.09</td><td>0.17</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">Rewriting erases most of the style signal (0.43 to 0.17 bits of information about the true candidate) but leaves the content signal intact. The attack weakens; it does not go away.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap prose">
+    <h2>What this means for venues</h2>
+    <p>Anonymity has to be assessed across the set of artifacts a venue releases, not document by document. Three things follow from the results. Expertise, not style, carries most of the leak, so style-obfuscation tools are not a fix. Rebuttals are the richest single artifact, because they are long, technical and written by the same hands as the review. And the cost of the attack is a few dollars, so the question is not whether it is feasible but when reviews, submissions and rebuttals should become visible relative to one another.</p>
+    <p>Our threat model covers systems where reviews and candidate submissions are public while reviewing is ongoing. Venues that hold either back until after the decision are outside its scope. Full limitations and the ethics statement are in the paper.</p>
+
+    <h2>Resources</h2>
+    <p>The repository contains the benchmark (298 instances, 5,061 distinct candidate submissions), the method and evaluation code organised by module, and the pipeline that built the benchmark from PubMed Central. Benchmark texts are redistributed under the F1000 platform's CC BY 4.0 licence; the code is MIT.</p>
+
+    <h2>Citation</h2>
+    <pre id="bib">@article{wang2026echo,
+  title   = {ECHO: Revealing Review-to-Submission Linkage in Anonymous Peer Review},
+  author  = {Wang, Rong and Luo, Mulong},
+  journal = {arXiv preprint arXiv:2610.27044},
+  year    = {2026},
+  url     = {https://arxiv.org/abs/2610.27044}
+}</pre>
+    <button class="copy" id="copybtn" type="button">Copy BibTeX</button>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">Rong Wang and Mulong Luo, Florida State University. The benchmark is released for research on reviewer anonymity; do not use it to identify individual reviewers.</div>
+</footer>
+
+<script>
+(function () {
+  var b = document.getElementById("copybtn"), t = document.getElementById("bib");
+  if (!b || !t) return;
+  b.addEventListener("click", function () {
+    var txt = t.textContent;
+    function done(ok) { b.textContent = ok ? "Copied" : "Select and copy"; setTimeout(function () { b.textContent = "Copy BibTeX"; }, 1800); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function () { done(true); }, function () { sel(); done(false); });
+    } else { sel(); done(false); }
+    function sel() { var r = document.createRange(); r.selectNodeContents(t); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }
+  });
+})();
+</script>
+</body>
+</html>
